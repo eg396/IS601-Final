@@ -116,8 +116,8 @@ jobs:
         with:
           push: true
           tags: |
-            kaw393939/601_module9:latest
-            kaw393939/601_module9:${{ github.sha }}
+            eg396/601_module14:latest
+            eg396/601_module14:${{ github.sha }}
           platforms: linux/amd64,linux/arm64
-          cache-from: type=registry,ref=kaw393939/601_module9:cache
+          cache-from: type=registry,ref=eg396/601_module14:cache
           cache-to: type=inline,mode=max
