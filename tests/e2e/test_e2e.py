@@ -26,12 +26,14 @@ def user_register(page: Page):
 
 def user_login(page: Page):
 
+    page.goto("http://localhost:8000/login")
+
     page.fill('input[name="username"]', "testuser123")
     page.fill('input[name="password"]', "StrongPass1!")
-    page.click("button[type=submit]")
 
-    # Should redirect to dashboard
-    page.wait_for_url("**/dashboard", timeout=5000)
+    with page.expect_navigation(url="**/dashboard", timeout=10000):
+        page.click("button[type=submit]")
+
 
 @pytest.mark.e2e
 def test_unauthorized_access_redirects_to_login(page):
