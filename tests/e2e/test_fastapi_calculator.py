@@ -251,7 +251,7 @@ def test_create_calculation_modulo(base_url: str):
     assert response.status_code == 201, f"Modulo calculation creation failed: {response.text}"
     data = response.json()
     # Expected result: 100 % 7 % 5 = 2
-    assert "result" in data and data["result"] == 10, f"Expected result 2, got {data.get('result')}"
+    assert "result" in data and data["result"] == 2, f"Expected result 2, got {data.get('result')}"
 
 def test_list_get_update_delete_calculation(base_url: str):
     user_data = {

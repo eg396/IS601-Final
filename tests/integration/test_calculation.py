@@ -65,7 +65,7 @@ def test_modulo_get_result():
     """
     Test that Modulo.get_result returns the correct quotient.
     """
-    inputs = [100, 2, 5]
+    inputs = [100, 7, 5]
     modulo = Modulo(user_id=dummy_user_id(), inputs=inputs)
     # Expected: 100 % 7 % 5 = 2
     result = modulo.get_result()
