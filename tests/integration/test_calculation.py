@@ -4,6 +4,7 @@ import uuid
 from app.models.calculation import (
     Calculation,
     Addition,
+    Modulo,
     Subtraction,
     Multiplication,
     Division,
@@ -59,6 +60,25 @@ def test_division_by_zero():
     division = Division(user_id=dummy_user_id(), inputs=inputs)
     with pytest.raises(ValueError, match="Cannot divide by zero."):
         division.get_result()
+
+def test_modulo_get_result():
+    """
+    Test that Modulo.get_result returns the correct quotient.
+    """
+    inputs = [100, 2, 5]
+    modulo = Modulo(user_id=dummy_user_id(), inputs=inputs)
+    # Expected: 100 % 7 % 5 = 2
+    result = modulo.get_result()
+    assert result == 2, f"Expected 2, got {result}"
+
+def test_modulo_division_by_zero():
+    """
+    Test that Modulo.get_result raises ValueError when dividing by zero.
+    """
+    inputs = [50, 0, 5]
+    modulo = Modulo(user_id=dummy_user_id(), inputs=inputs)
+    with pytest.raises(ValueError, match="Cannot divide by zero."):
+        modulo.get_result()
 
 def test_calculation_factory_addition():
     """
@@ -116,6 +136,20 @@ def test_calculation_factory_division():
     assert isinstance(calc, Division), "Factory did not return a Division instance."
     assert calc.get_result() == 10, "Incorrect division result."
 
+def test_calculation_factory_modulo():
+    """
+    Test the Calculation.create factory method for modulo division.
+    """
+    inputs = [100, 7, 5]
+    calc = Calculation.create(
+        calculation_type='modulo',
+        user_id=dummy_user_id(),
+        inputs=inputs,
+    )
+    # Expected: 100 % 7 % 5 = 2
+    assert isinstance(calc, Modulo), "Factory did not return a Modulo instance."
+    assert calc.get_result() == 2, "Incorrect modulo result."
+
 def test_calculation_factory_invalid_type():
     """
     Test that Calculation.create raises a ValueError for an unsupported calculation type.
@@ -150,3 +184,12 @@ def test_invalid_inputs_for_division():
     division = Division(user_id=dummy_user_id(), inputs=[10])
     with pytest.raises(ValueError, match="Inputs must be a list with at least two numbers."):
         division.get_result()
+
+def test_invalid_inputs_for_modulo():
+    """
+    Test that providing fewer than two numbers to Modulo.get_result raises a ValueError.
+    """
+    modulo = Modulo(user_id=dummy_user_id(), inputs=[10])
+    with pytest.raises(ValueError, match="Inputs must be a list with at least two numbers."):
+        modulo.get_result()
+
