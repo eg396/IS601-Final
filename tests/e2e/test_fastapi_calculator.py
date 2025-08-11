@@ -229,6 +229,30 @@ def test_create_calculation_division(base_url: str):
     # Expected result: 100 / 2 / 5 = 10
     assert "result" in data and data["result"] == 10, f"Expected result 10, got {data.get('result')}"
 
+def test_create_calculation_modulo(base_url: str):
+    user_data = {
+        "first_name": "Calc",
+        "last_name": "Modulo",
+        "email": f"calc.mod{uuid4()}@example.com",
+        "username": f"calc_mod_{uuid4()}",
+        "password": "SecurePass123!",
+        "confirm_password": "SecurePass123!"
+    }
+    token_data = register_and_login(base_url, user_data)
+    access_token = token_data["access_token"]
+    headers = {"Authorization": f"Bearer {access_token}"}
+    url = f"{base_url}/calculations"
+    payload = {
+        "type": "modulo",
+        "inputs": [100, 7, 5],
+        "user_id": "ignored"
+    }
+    response = requests.post(url, json=payload, headers=headers)
+    assert response.status_code == 201, f"Modulo calculation creation failed: {response.text}"
+    data = response.json()
+    # Expected result: 100 % 7 % 5 = 2
+    assert "result" in data and data["result"] == 10, f"Expected result 2, got {data.get('result')}"
+
 def test_list_get_update_delete_calculation(base_url: str):
     user_data = {
         "first_name": "Calc",
@@ -317,4 +341,15 @@ def test_model_division():
     # Test division by zero error
     with pytest.raises(ValueError):
         calc_zero = Calculation.create("division", dummy_user_id, [100, 0])
+        calc_zero.get_result()
+
+def test_model_modulo():
+    dummy_user_id = uuid4()
+    calc = Calculation.create("modulo", dummy_user_id, [100, 7, 5])
+    result = calc.get_result()
+    assert result == 2, f"Division result incorrect: expected 2, got {result}"
+    
+    # Test modulo division by zero error
+    with pytest.raises(ValueError):
+        calc_zero = Calculation.create("modulo", dummy_user_id, [100, 0])
         calc_zero.get_result()
