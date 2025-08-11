@@ -31,6 +31,10 @@ def user_login(page: Page):
     page.fill('input[name="username"]', "testuser123")
     page.fill('input[name="password"]', "StrongPass1!")
 
+    print("Current URL before login attempt:", page.url)
+    cookies = page.context.cookies()
+    print("Cookies before login:", cookies)
+
     with page.expect_navigation(url="**/dashboard", timeout=10000):
         page.click("button[type=submit]")
 
