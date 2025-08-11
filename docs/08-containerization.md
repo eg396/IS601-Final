@@ -29,7 +29,7 @@ Let's create a Dockerfile for our FastAPI application:
 
 ```dockerfile
 # Dockerfile
-FROM python:3.10-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
@@ -253,7 +253,7 @@ Here's an example production Dockerfile:
 
 ```dockerfile
 # Dockerfile.prod
-FROM python:3.10-slim as builder
+FROM python:3.12-slim as builder
 
 WORKDIR /app
 
@@ -268,7 +268,7 @@ COPY requirements.txt .
 RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
 
 # Final stage
-FROM python:3.10-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
