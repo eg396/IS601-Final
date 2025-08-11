@@ -354,3 +354,42 @@ class Division(Calculation):
                 raise ValueError("Cannot divide by zero.")
             result /= value
         return result
+
+class Modulo(Calculation):
+    """
+    Modulo calculation subclass.
+    
+    Implements modulus (remainder) division starting from the first number.
+    Examples:
+        [10, 2, 5] -> 10 % 3 % 2 = 1
+        [100, 4, 5] -> 100 % 40 % 6 = 2
+        
+    Special case handling:
+        - Division by zero raises a ValueError
+    """
+    __mapper_args__ = {"polymorphic_identity": "modulo"}
+
+    def get_result(self) -> float:
+        """
+        Calculate the result of modulo division of the first value by all subsequent values.
+        
+        Takes the first number and finds the remainder via modula by all remaining numbers sequentially.
+        Includes validation to prevent division by zero.
+        
+        Returns:
+            float: The result of the modulo sequence
+            
+        Raises:
+            ValueError: If inputs are not a list, if fewer than 2 numbers provided,
+                        or if attempting to divide by zero
+        """
+        if not isinstance(self.inputs, list):
+            raise ValueError("Inputs must be a list of numbers.")
+        if len(self.inputs) < 2:
+            raise ValueError("Inputs must be a list with at least two numbers.")
+        result = self.inputs[0]
+        for value in self.inputs[1:]:
+            if value == 0:
+                raise ValueError("Cannot modulo divide by zero.")
+            result /= value
+        return result
