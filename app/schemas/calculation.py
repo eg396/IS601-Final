@@ -36,6 +36,7 @@ class CalculationType(str, Enum):
     SUBTRACTION = "subtraction"
     MULTIPLICATION = "multiplication"
     DIVISION = "division"
+    MODULO = "modulo"
 
 class CalculationBase(BaseModel):
     """

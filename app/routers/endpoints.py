@@ -9,7 +9,7 @@ from app.models.calculation import Calculation
 from app.models.user import User
 from app.schemas.calculation import CalculationBase, CalculationResponse, CalculationUpdate
 from app.database import get_db
-from app.operations import add, subtract, multiply, divide
+from app.operations import add, modulo, subtract, multiply, divide
 
 router = APIRouter(
     prefix="/calculations",
@@ -73,7 +73,8 @@ def update_calculation(
         "addition": add,
         "subtraction": subtract,
         "multiplication": multiply,
-        "division": divide
+        "division": divide,
+        "modulo": modulo
     }
 
     operation_key = getattr(calc, "type", None) or getattr(calc, "operation", None)
@@ -105,7 +106,8 @@ def add_calculation(
         "addition": add,
         "subtraction": subtract,
         "multiplication": multiply,
-        "division": divide
+        "division": divide,
+        "modulo": modulo
     }
 
     op_type = calculation_data.type.value
