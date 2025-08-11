@@ -59,6 +59,8 @@ def test_calculation_crud_flow(page: Page):
     # 2. Login
 
     user_login(page)
+    print("Current page URL after login attempt:", page.url)
+    page.screenshot(path="login_failure.png")
 
     # 3. Create a calculation
     page.click("text=New Calculation")
