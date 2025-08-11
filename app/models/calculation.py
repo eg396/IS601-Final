@@ -178,6 +178,7 @@ class AbstractCalculation:
             'subtraction': Subtraction,
             'multiplication': Multiplication,
             'division': Division,
+            'modulo': Modulo,
         }
         calculation_class = calculation_classes.get(calculation_type.lower())
         if not calculation_class:
@@ -391,5 +392,5 @@ class Modulo(Calculation):
         for value in self.inputs[1:]:
             if value == 0:
                 raise ValueError("Cannot modulo divide by zero.")
-            result /= value
+            result %= value
         return result

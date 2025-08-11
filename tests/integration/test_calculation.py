@@ -77,7 +77,7 @@ def test_modulo_division_by_zero():
     """
     inputs = [50, 0, 5]
     modulo = Modulo(user_id=dummy_user_id(), inputs=inputs)
-    with pytest.raises(ValueError, match="Cannot divide by zero."):
+    with pytest.raises(ValueError, match="Cannot modulo divide by zero."):
         modulo.get_result()
 
 def test_calculation_factory_addition():
