@@ -116,8 +116,8 @@ jobs:
         with:
           push: true
           tags: |
-            eg396/601_module14:latest
-            eg396/601_module14:${{ github.sha }}
+            eg396/601_final:latest
+            eg396/601_final:${{ github.sha }}
           platforms: linux/amd64,linux/arm64
-          cache-from: type=registry,ref=eg396/601_module14:cache
+          cache-from: type=registry,ref=eg396/601_final:cache
           cache-to: type=inline,mode=max
