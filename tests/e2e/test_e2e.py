@@ -34,6 +34,10 @@ def user_login(page: Page):
     with page.expect_navigation(url="**/dashboard", timeout=10000):
         page.click("button[type=submit]")
 
+    print("Current URL after login attempt:", page.url)
+    cookies = page.context.cookies()
+    print("Cookies after login:", cookies)
+
 
 @pytest.mark.e2e
 def test_unauthorized_access_redirects_to_login(page):
