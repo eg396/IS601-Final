@@ -33,6 +33,7 @@ import uvicorn  # ASGI server for running FastAPI apps
 
 # Application imports
 from app.auth.dependencies import get_current_active_user  # Authentication dependency
+from app.auth.jwt import get_current_user
 from app.models.calculation import Calculation  # Database model for calculations
 from app.models.user import User  # Database model for users
 from app.schemas.calculation import CalculationBase, CalculationResponse, CalculationUpdate  # API request/response schemas
@@ -70,6 +71,14 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan  # Pass our lifespan context manager
 )
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    if exc.status_code == status.HTTP_401_UNAUTHORIZED:
+        return RedirectResponse(url="/login")
+    #if exc.status_code == status.HTTP_404_NOT_FOUND:   This messes up other tests and is not a hard requirement
+        #return RedirectResponse(url="/dashboard")
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
 # add BREAD router
 
@@ -119,7 +128,7 @@ def register_page(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
 
 @app.get("/dashboard", response_class=HTMLResponse, tags=["web"])
-def dashboard_page(request: Request):
+def dashboard_page(request: Request, current_user: User = Depends(get_current_user)):
     """
     Dashboard page, listing calculations & new calculation form.
     
@@ -133,7 +142,7 @@ def dashboard_page(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
 @app.get("/dashboard/view/{calc_id}", response_class=HTMLResponse, tags=["web"])
-def view_calculation_page(request: Request, calc_id: str):
+def view_calculation_page(request: Request, calc_id: str, current_user: User = Depends(get_current_user)):
     """
     Page for viewing a single calculation (Read).
     
@@ -150,7 +159,7 @@ def view_calculation_page(request: Request, calc_id: str):
     return templates.TemplateResponse("view_calculation.html", {"request": request, "calc_id": calc_id})
 
 @app.get("/dashboard/edit/{calc_id}", response_class=HTMLResponse, tags=["web"])
-def edit_calculation_page(request: Request, calc_id: str):
+def edit_calculation_page(request: Request, calc_id: str, current_user: User = Depends(get_current_user)):
     """
     Page for editing a calculation (Update).
     
