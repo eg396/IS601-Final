@@ -39,6 +39,7 @@ from app.schemas.calculation import CalculationBase, CalculationResponse, Calcul
 from app.schemas.token import TokenResponse  # API token schema
 from app.schemas.user import UserCreate, UserResponse, UserLogin  # User schemas
 from app.database import Base, get_db, engine  # Database connection
+from app.routers import endpoints
 
 
 # ------------------------------------------------------------------------------
@@ -69,6 +70,10 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan  # Pass our lifespan context manager
 )
+
+# add BREAD router
+
+app.include_router(endpoints.router)
 
 # ------------------------------------------------------------------------------
 # Static Files and Templates Configuration
