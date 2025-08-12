@@ -67,7 +67,6 @@ class UserCreate(UserBase):
         if not any(char.isdigit() for char in password):
             raise ValueError("Password must contain at least one digit")
         if not any(char in "!@#$%^&*()_+-=[]{}|;:,.<>?" for char in password):
-            print("No special characters detected! Raising ValueError")
             raise ValueError("Password must contain at least one special character")
         return self
 

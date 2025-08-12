@@ -103,3 +103,31 @@ def test_get_current_active_user_inactive(mock_verify_token):
 
     assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
     assert exc_info.value.detail == "Inactive user"
+
+def test_get_current_user_with_uuid(monkeypatch):
+    test_uuid = uuid4()
+
+    # Mock User.verify_token to return UUID directly
+    def mock_verify_token(token):
+        return test_uuid
+    
+    monkeypatch.setattr("app.models.user.User.verify_token", mock_verify_token)
+
+    # Call function with dummy token
+    user = get_current_user(token="dummy-token")
+
+    # Assert it returns UserResponse with id == test_uuid
+    assert isinstance(user, UserResponse)
+    assert user.id == test_uuid
+    assert user.username == "unknown"
+    assert user.email == "unknown@example.com"
+
+def test_get_current_user_raises(monkeypatch):
+    # Test invalid token returns exception
+    monkeypatch.setattr("app.models.user.User.verify_token", lambda token: None)
+
+    import pytest
+    from fastapi import HTTPException
+
+    with pytest.raises(HTTPException):
+        get_current_user(token="invalid-token")

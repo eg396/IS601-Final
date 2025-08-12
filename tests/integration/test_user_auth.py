@@ -1,10 +1,17 @@
 # tests/integration/test_user_auth.py
 
+from unittest.mock import AsyncMock, MagicMock
+from fastapi import HTTPException
 import pytest
 from uuid import UUID
 import pydantic_core
 from sqlalchemy.exc import IntegrityError
+from jose import jwt, JWTError, ExpiredSignatureError
+from app.auth.jwt import decode_token, get_current_user
 from app.models.user import User
+from app.schemas.token import TokenType
+import nest_asyncio
+nest_asyncio.apply()
 
 def test_password_hashing(db_session, fake_user_data):
     """Test password hashing and verification functionality"""
@@ -194,3 +201,135 @@ def test_missing_password_registration(db_session):
     # Adjust the expected error message
     with pytest.raises(ValueError, match="Password must be at least 6 characters long"):
         User.register(db_session, test_data)
+
+
+@pytest.mark.asyncio
+async def test_decode_token_valid(monkeypatch):
+    fake_payload = {
+        "sub": "user123",
+        "type": TokenType.ACCESS.value,
+        "exp": 9999999999,
+        "iat": 1111111111,
+        "jti": "jti123"
+    }
+
+    monkeypatch.setattr("app.auth.jwt.jwt.decode", lambda *args, **kwargs: fake_payload)
+    monkeypatch.setattr("app.auth.jwt.is_blacklisted", AsyncMock(return_value=False))
+
+    payload = await decode_token("faketoken", TokenType.ACCESS)
+    assert payload == fake_payload
+
+@pytest.mark.asyncio
+async def test_decode_token_wrong_type(monkeypatch):
+    fake_payload = {
+        "sub": "user123",
+        "type": "refresh",  # wrong type for access token
+        "exp": 9999999999,
+        "iat": 1111111111,
+        "jti": "jti123"
+    }
+
+    monkeypatch.setattr("app.auth.jwt.jwt.decode", lambda *args, **kwargs: fake_payload)
+    monkeypatch.setattr("app.auth.jwt.is_blacklisted", AsyncMock(return_value=False))
+
+    with pytest.raises(HTTPException) as exc:
+        await decode_token("faketoken", TokenType.ACCESS)
+    assert exc.value.status_code == 401
+    assert "Invalid token type" in exc.value.detail
+
+@pytest.mark.asyncio
+async def test_decode_token_blacklisted(monkeypatch):
+    fake_payload = {
+        "sub": "user123",
+        "type": TokenType.ACCESS.value,
+        "exp": 9999999999,
+        "iat": 1111111111,
+        "jti": "blacklistedjti"
+    }
+
+    monkeypatch.setattr("app.auth.jwt.jwt.decode", lambda *args, **kwargs: fake_payload)
+    monkeypatch.setattr("app.auth.jwt.is_blacklisted", AsyncMock(return_value=True))
+
+    with pytest.raises(HTTPException) as exc:
+        await decode_token("faketoken", TokenType.ACCESS)
+    assert exc.value.status_code == 401
+    assert "revoked" in exc.value.detail
+
+@pytest.mark.asyncio
+async def test_decode_token_expired(monkeypatch):
+    def raise_expired(*args, **kwargs):
+        raise ExpiredSignatureError()
+
+    monkeypatch.setattr("app.auth.jwt.jwt.decode", raise_expired)
+
+    with pytest.raises(HTTPException) as exc_info:
+        await decode_token("fake_token", TokenType.ACCESS)
+
+    assert exc_info.value.status_code == 401
+    assert exc_info.value.detail == "Token has expired"
+    
+
+    with pytest.raises(HTTPException) as exc:
+        await decode_token("expiredtoken", TokenType.ACCESS)
+    assert exc.value.status_code == 401
+    assert "expired" in exc.value.detail
+
+@pytest.mark.asyncio
+async def test_decode_token_jwt_error(monkeypatch):
+    def raise_jwt_error(*args, **kwargs):
+        raise jwt.JWTError()
+    monkeypatch.setattr("app.auth.jwt.jwt.decode", raise_jwt_error)
+
+    with pytest.raises(HTTPException) as exc:
+        await decode_token("badtoken", TokenType.ACCESS)
+    assert exc.value.status_code == 401
+    assert "validate credentials" in exc.value.detail
+
+@pytest.mark.asyncio
+async def test_get_current_user_success(monkeypatch):
+    # Mock decode_token to return valid payload
+    fake_payload = {
+        "sub": "user123",
+        "type": TokenType.ACCESS.value,
+        "exp": 9999999999,
+        "iat": 1111111111,
+        "jti": "jti123"
+    }
+    monkeypatch.setattr("app.auth.jwt.decode_token", AsyncMock(return_value=fake_payload))
+
+    # Create fake user object
+    class FakeUser:
+        id = "user123"
+        is_active = True
+
+    fake_db = MagicMock()
+    fake_db.query.return_value.filter.return_value.first.return_value = FakeUser()
+
+    user = await get_current_user(token="token", db=fake_db)
+    assert user.id == "user123"
+
+@pytest.mark.asyncio
+async def test_get_current_user_not_found(monkeypatch):
+    monkeypatch.setattr("app.auth.jwt.decode_token", AsyncMock(return_value={"sub": "user123", "type": TokenType.ACCESS.value}))
+
+    fake_db = MagicMock()
+    fake_db.query.return_value.filter.return_value.first.return_value = None
+
+    with pytest.raises(HTTPException) as exc:
+        await get_current_user(token="token", db=fake_db)
+    assert exc.value.status_code == 404
+
+@pytest.mark.asyncio
+async def test_get_current_user_inactive(monkeypatch):
+    monkeypatch.setattr("app.auth.jwt.decode_token", AsyncMock(return_value={"sub": "user123", "type": TokenType.ACCESS.value}))
+
+    class InactiveUser:
+        id = "user123"
+        is_active = False
+
+    fake_db = MagicMock()
+    fake_db.query.return_value.filter.return_value.first.return_value = InactiveUser()
+
+    with pytest.raises(HTTPException) as exc:
+        await get_current_user(token="token", db=fake_db)
+    assert exc.value.status_code == 400

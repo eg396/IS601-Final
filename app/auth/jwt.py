@@ -148,12 +148,6 @@ async def get_current_user(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
-            
-        if user is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="User not found"
-            )
         
         if not user.is_active:
             raise HTTPException(
@@ -163,6 +157,9 @@ async def get_current_user(
             
         return user
         
+    except HTTPException:
+        # Re-raise to preserve status code and message
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
