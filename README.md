@@ -20,10 +20,10 @@ This project is for the IS 601 summer semester.
 
 # Reflection
 
-This assignment was tough - I felt like the BREAD added in a layer of complexity to everything that, while very helpful to the overall process, took some getting used to. I expect this to be a good enough basis to propel me towards a decent score in the final project, at least, even though I lost a significant amount of time this past 2 weeks.
+This final project was one that was truly intimidating for me. I do feel that to an extent I was able to accomplish a lot, however I also believe that I could have accomplished a lot more with this than I wanted to. I do want to keep working on this as long as possible, despite the time issue (it's due tonight), however at the moment I feel quite ill so I intend to pick this up tomorrow and keep working as much as I can.
 
-I do feel like I learned a lot about e2e tests though; I haven't had a ton of experience with them so more interaction is always helpful towards a strong understanding of core concepts.
+I did very much appreciate what I learned in this class - I feel that this project is an example of my rapidly expanding skills as a software developer. I have dealt with a huge number of unique problems to solve each time I did an assignment, and as a result I have grown more throughtful about full-stack development.
 
 # Links
 
-docker hub: https://hub.docker.com/repository/docker/eg396/is601-m13/general
+docker hub: https://hub.docker.com/repository/docker/eg396/601_final/general
