@@ -17,6 +17,7 @@ The application follows a RESTful API design with proper separation of concerns:
 
 from contextlib import asynccontextmanager  # Used for startup/shutdown events
 from datetime import datetime, timezone, timedelta
+import os
 from uuid import UUID  # For type validation of UUIDs in path parameters
 from typing import List
 
@@ -85,7 +86,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Set up Jinja2 templates directory for HTML rendering
 templates = Jinja2Templates(directory="templates")
 
-
 # ------------------------------------------------------------------------------
 # Web (HTML) Routes
 # ------------------------------------------------------------------------------
@@ -94,12 +94,12 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get("/", response_class=HTMLResponse, tags=["web"])
 def read_index(request: Request):
-    """
-    Landing page.
-    
-    Displays the welcome page with links to register and login.
-    """
-    return templates.TemplateResponse("index.html", {"request": request})
+    response = templates.TemplateResponse("index.html", {"request": request, "now": datetime.now()})
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
 
 @app.get("/login", response_class=HTMLResponse, tags=["web"])
 def login_page(request: Request):
@@ -405,4 +405,4 @@ def delete_calculation(
 # ------------------------------------------------------------------------------
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="127.0.0.1", port=8001, log_level="info")
+    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, log_level="info")

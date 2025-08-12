@@ -110,3 +110,36 @@ def test_user_login_invalid_password():
     with pytest.raises(ValidationError):
         UserLogin(**data)
 
+
+def test_password_strength_valid():
+    # A password that meets all criteria should pass
+    user = UserCreate(
+        username="testuser",
+        email="test@example.com",
+        first_name="Test",
+        last_name="User",
+        password="StrongPass1!",
+        confirm_password="StrongPass1!"
+    )
+    assert user.password == "StrongPass1!"
+
+@pytest.mark.parametrize("password,error_message", [
+    ("short1!", "String should have at least 8 characters"),
+    ("alllowercase1!", "Password must contain at least one uppercase letter"),
+    ("ALLUPPERCASE1!", "Password must contain at least one lowercase letter"),
+    ("NoDigits!", "Password must contain at least one digit"),
+    ("NoSpecialChars1", "Password must contain at least one special character"), need to get this working!
+])
+def test_password_strength_invalid(password, error_message):
+
+    with pytest.raises(ValueError) as exc_info:
+        UserCreate(
+            username="testuser",
+            email="test@example.com",
+            first_name="Test",
+            last_name="User",
+            password=password,
+            confirm_password=password
+        )
+    print(f"password {password} is throwing error {str(exc_info.value)}")
+    assert error_message in str(exc_info.value)
