@@ -21,6 +21,7 @@ idna==3.10
 iniconfig==2.0.0
 Jinja2==3.1.5
 MarkupSafe==3.0.2
+nest-asyncio==1.6.0
 packaging==24.2
 passlib==1.7.4
 playwright==1.54.0
@@ -33,6 +34,7 @@ pydantic-settings==2.7.1
 pydantic_core==2.27.2
 pyee==13.0.0
 pytest==8.3.4
+pytest-asyncio==1.1.0
 pytest-cov==6.0.0
 pytest-cover==3.0.0
 pytest-coverage==0.0
